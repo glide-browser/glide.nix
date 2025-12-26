@@ -2,6 +2,7 @@
   lib,
   stdenv,
   fetchurl,
+  # keep-sorted start
   adwaita-icon-theme,
   alsa-lib,
   autoPatchelfHook,
@@ -12,6 +13,7 @@
   hicolor-icon-theme,
   libXtst,
   libva,
+  mesa,
   makeBinaryWrapper,
   makeDesktopItem,
   patchelfUnstable,
@@ -19,6 +21,21 @@
   pipewire,
   wrapGAppsHook3,
   nix-update-script,
+  ffmpeg_7,
+  libGL,
+  libX11,
+  libXScrnSaver,
+  libpciaccess,
+  # Additional libraries for WebGL and GFX support
+  libffi,
+  libgcrypt,
+  libxcomposite,
+  libxdamage,
+  libxrandr,
+  libXt,
+  libevent,
+  # Ensure OpenGL and WebGL support
+  libGLU,
   ...
 }:
 stdenv.mkDerivation (finalAttrs: {
@@ -65,15 +82,35 @@ stdenv.mkDerivation (finalAttrs: {
     gtk3
     hicolor-icon-theme
     libXtst
+    libGL
+    libX11
+    libXScrnSaver
+    libpciaccess
+    ffmpeg_7
+    libffi
+    libgcrypt
+    libxcomposite
+    libxdamage
+    libxrandr
+    libXt
+    alsa-lib
+    libevent
+    mesa
+    libGLU
   ];
 
   runtimeDependencies = lib.optionals stdenv.isLinux [
     curl
     libva.out
+    mesa
     pciutils
+    libGL
   ];
 
-  appendRunpaths = lib.optionals stdenv.isLinux [ "${pipewire}/lib" ];
+  appendRunpaths = lib.optionals stdenv.isLinux [
+    "${pipewire}/lib"
+    "${libGL}/lib"
+  ];
 
   # Firefox uses "relrhack" to manually process relocations from a fixed offset
   patchelfFlags = lib.optionals stdenv.isLinux [ "--no-clobber-old-sections" ];
@@ -86,6 +123,10 @@ stdenv.mkDerivation (finalAttrs: {
     /usr/bin/hdiutil detach /Volumes/Glide
 
     runHook postUnpack
+  preFixup = lib.optionals stdenv.isLinux ''
+    gappsWrapperArgs+=(
+        --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ ffmpeg_7 ]}"
+      )
   '';
 
   installPhase =
@@ -117,12 +158,16 @@ stdenv.mkDerivation (finalAttrs: {
         mkdir -p $out/Applications
         cp -r Glide.app $out/Applications/
 
-        mkdir -p $out/bin
-        ln -s $out/Applications/Glide.app/Contents/MacOS/glide $out/bin/glide
-        ln -s $out/bin/glide $out/bin/glide-browser
+    runHook postInstall
 
-        runHook postInstall
-      '';
+  # WebGL/Graphics settings via environment variables
+  shellHook = lib.optionals stdenv.isLinux ''
+    export MOZ_DISABLE_RDD_SANDBOX=1  # Disable RDD sandbox to prevent WebGL issues
+    export MOZ_WEBRENDER=1  # Enable WebRender for GPU acceleration
+    export MOZ_ACCELERATED=1  # Enable hardware acceleration for WebGL
+    export WebglAllowWindowsNativeGl=true  # Allow native GL for WebGL
+    export AllowWebgl2=true  # Enable WebGL2 support
+  '';
 
   desktopItems = [
     (makeDesktopItem {
