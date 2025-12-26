@@ -123,6 +123,7 @@ stdenv.mkDerivation (finalAttrs: {
     /usr/bin/hdiutil detach /Volumes/Glide
 
     runHook postUnpack
+    '';
   preFixup = lib.optionals stdenv.isLinux ''
     gappsWrapperArgs+=(
         --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ ffmpeg_7 ]}"
