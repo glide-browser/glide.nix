@@ -123,7 +123,7 @@ stdenv.mkDerivation (finalAttrs: {
     /usr/bin/hdiutil detach /Volumes/Glide
 
     runHook postUnpack
-    '';
+  '';
   preFixup = lib.optionals stdenv.isLinux ''
     gappsWrapperArgs+=(
         --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ ffmpeg_7 ]}"
@@ -159,7 +159,12 @@ stdenv.mkDerivation (finalAttrs: {
         mkdir -p $out/Applications
         cp -r Glide.app $out/Applications/
 
-    runHook postInstall
+        mkdir -p $out/bin
+        ln -s $out/Applications/Glide.app/Contents/MacOS/glide $out/bin/glide
+        ln -s $out/bin/glide $out/bin/glide-browser
+
+        runHook postInstall
+      '';
 
   # WebGL/Graphics settings via environment variables
   shellHook = lib.optionals stdenv.isLinux ''
