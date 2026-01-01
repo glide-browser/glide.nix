@@ -23,26 +23,26 @@
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "glide-browser";
-  version = "0.1.56a";
+  version = "0.1.57a";
 
   src =
     let
       sources = {
         "x86_64-linux" = fetchurl {
           url = "https://github.com/glide-browser/glide/releases/download/${finalAttrs.version}/glide.linux-x86_64.tar.xz";
-          sha256 = "0b231ajfwzy7zqip0ijax1n69rx1w4fj5r74r9ga50fi4c63vzpn";
+          sha256 = "1bdmrpbbq1zxpgd06sc8xvph29q3ivlc3k6fbv9xs33sq03jzb84";
         };
         "aarch64-linux" = fetchurl {
           url = "https://github.com/glide-browser/glide/releases/download/${finalAttrs.version}/glide.linux-aarch64.tar.xz";
-          sha256 = "00r32xfgah4rnwklmgdas07jrxpxpfcnsh60n92krj5wbn2gm74c";
+          sha256 = "1qyki7cfmkhi2p1wfgy1ymr6m52b8vn5a34gn7gfybk616vlvj23";
         };
         "x86_64-darwin" = fetchurl {
           url = "https://github.com/glide-browser/glide/releases/download/${finalAttrs.version}/glide.macos-x86_64.dmg";
-          sha256 = "095pxgk6jv9v073bifhx8ragk5r1zg73fdc6rh9qfpw1zxz6597q";
+          sha256 = "0zz7jd77jqd6frfg1mq19bafdmy4zidl30xhcymqcbgqpv98fflf";
         };
         "aarch64-darwin" = fetchurl {
           url = "https://github.com/glide-browser/glide/releases/download/${finalAttrs.version}/glide.macos-aarch64.dmg";
-          sha256 = "0ryx2fhw2a6jggz3b8x6i3hnpvbik8dvq3ppwpwh7gfw9iripczy";
+          sha256 = "078gx609mfbg486nmlxs7pqjc4n81hxxwf9sqdmqvyafzdyc9lh5";
         };
       };
     in
@@ -51,7 +51,8 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     copyDesktopItems
     makeBinaryWrapper
-  ] ++ lib.optionals stdenv.isLinux [
+  ]
+  ++ lib.optionals stdenv.isLinux [
     autoPatchelfHook
     patchelfUnstable
     wrapGAppsHook3
@@ -79,45 +80,49 @@ stdenv.mkDerivation (finalAttrs: {
 
   unpackPhase = lib.optionalString stdenv.isDarwin ''
     runHook preUnpack
-    
+
     /usr/bin/hdiutil attach -nobrowse -readonly $src
     cp -r /Volumes/Glide/Glide.app .
     /usr/bin/hdiutil detach /Volumes/Glide
-    
+
     runHook postUnpack
   '';
 
-  installPhase = if stdenv.isLinux then ''
-    runHook preInstall
+  installPhase =
+    if stdenv.isLinux then
+      ''
+        runHook preInstall
 
-    mkdir -p $out/bin $out/share/icons/hicolor/ $out/lib/glide-browser-bin-${finalAttrs.version}
-    cp -t $out/lib/glide-browser-bin-${finalAttrs.version} -r *
-    chmod +x $out/lib/glide-browser-bin-${finalAttrs.version}/glide
-    iconDir=$out/share/icons/hicolor
-    browserIcons=$out/lib/glide-browser-bin-${finalAttrs.version}/browser/chrome/icons/default
+        mkdir -p $out/bin $out/share/icons/hicolor/ $out/lib/glide-browser-bin-${finalAttrs.version}
+        cp -t $out/lib/glide-browser-bin-${finalAttrs.version} -r *
+        chmod +x $out/lib/glide-browser-bin-${finalAttrs.version}/glide
+        iconDir=$out/share/icons/hicolor
+        browserIcons=$out/lib/glide-browser-bin-${finalAttrs.version}/browser/chrome/icons/default
 
-    for i in 16 32 48 64 128; do
-      iconSizeDir="$iconDir/''${i}x$i/apps"
-      mkdir -p $iconSizeDir
-      cp $browserIcons/default$i.png $iconSizeDir/glide-browser.png
-    done
+        for i in 16 32 48 64 128; do
+          iconSizeDir="$iconDir/''${i}x$i/apps"
+          mkdir -p $iconSizeDir
+          cp $browserIcons/default$i.png $iconSizeDir/glide-browser.png
+        done
 
-    ln -s $out/lib/glide-browser-bin-${finalAttrs.version}/glide $out/bin/glide
-    ln -s $out/bin/glide $out/bin/glide-browser
+        ln -s $out/lib/glide-browser-bin-${finalAttrs.version}/glide $out/bin/glide
+        ln -s $out/bin/glide $out/bin/glide-browser
 
-    runHook postInstall
-  '' else ''
-    runHook preInstall
+        runHook postInstall
+      ''
+    else
+      ''
+        runHook preInstall
 
-    mkdir -p $out/Applications
-    cp -r Glide.app $out/Applications/
-    
-    mkdir -p $out/bin
-    ln -s $out/Applications/Glide.app/Contents/MacOS/glide $out/bin/glide
-    ln -s $out/bin/glide $out/bin/glide-browser
+        mkdir -p $out/Applications
+        cp -r Glide.app $out/Applications/
 
-    runHook postInstall
-  '';
+        mkdir -p $out/bin
+        ln -s $out/Applications/Glide.app/Contents/MacOS/glide $out/bin/glide
+        ln -s $out/bin/glide $out/bin/glide-browser
+
+        runHook postInstall
+      '';
 
   desktopItems = [
     (makeDesktopItem {
@@ -171,7 +176,12 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://glide-browser.app/";
     license = lib.licenses.mpl20;
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
-    platforms = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+    platforms = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
     maintainers = with lib.maintainers; [ pyrox0 ];
     mainProgram = "glide-browser";
   };
