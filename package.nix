@@ -2,28 +2,94 @@
   lib,
   stdenv,
   fetchurl,
-  adwaita-icon-theme,
-  alsa-lib,
+  # Build/Packaging Tools
   autoPatchelfHook,
   copyDesktopItems,
-  curl,
-  dbus-glib,
-  gtk3,
-  hicolor-icon-theme,
-  libXtst,
-  libva,
   makeBinaryWrapper,
   makeDesktopItem,
   patchelfUnstable,
-  pciutils,
-  pipewire,
   wrapGAppsHook3,
   nix-update-script,
+  # Core Libs
+  alsa-lib,
+  at-spi2-atk,
+  atk,
+  cairo,
+  curl,
+  dbus,
+  dbus-glib,
+  ffmpeg_7,
+  gdk-pixbuf,
+  glib,
+  gsettings-desktop-schemas,
+  gtk3,
+  libcanberra-gtk3,
   libGL,
+  libdrm,
+  libgbm,
+  libnotify,
+  libpulseaudio,
+  librsvg,
+  libva,
+  libxkbcommon,
+  mesa,
+  pango,
+  pciutils,
+  pipewire,
+  speechd-minimal,
   udev,
-  ffmpeg,
+  vulkan-loader,
+  wayland,
+  xorg,
   ...
 }:
+let
+  appId = "glide-browser";
+
+  # These libraries are dlopen()'ed by the browser executable at runtime.
+  # They MUST be in LD_LIBRARY_PATH for features to work.
+  runtimeLibs = [
+    # Core GUI & IPC
+    libGL
+    libcanberra-gtk3
+    libdrm
+    libgbm
+    libnotify
+    libxkbcommon
+    wayland
+    dbus
+    dbus-glib
+    gtk3
+    glib
+    cairo
+    pango
+    gdk-pixbuf
+    atk
+    at-spi2-atk
+
+    # Media (Microphone & Audio)
+    pipewire
+    libpulseaudio
+    alsa-lib
+    speechd-minimal
+
+    # Hardware Acceleration & Codecs
+    ffmpeg_7
+    libva
+    mesa
+    vulkan-loader
+    udev
+
+    # X11 Compatibility
+    xorg.libX11
+    xorg.libXcomposite
+    xorg.libXdamage
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXrandr
+    xorg.libxcb
+  ];
+in
 stdenv.mkDerivation (finalAttrs: {
   pname = "glide-browser";
   version = "0.1.58a";
@@ -61,54 +127,50 @@ stdenv.mkDerivation (finalAttrs: {
     wrapGAppsHook3
   ];
 
-  buildInputs = lib.optionals stdenv.isLinux [
-    adwaita-icon-theme
-    alsa-lib
-    dbus-glib
-    gtk3
-    hicolor-icon-theme
-    libXtst
-    udev
-    libGL
-  ];
+  # Provide strict superset of libs for autoPatchelf to resolve symbols
+  buildInputs = lib.optionals stdenv.isLinux (
+    runtimeLibs
+    ++ [
+      speechd-minimal
+      pciutils
+      curl
+      gsettings-desktop-schemas
+      librsvg
+    ]
+  );
 
-  runtimeDependencies = lib.optionals stdenv.isLinux [
-    curl
-    libva.out
-    pciutils
-    libGL
-    udev
-  ];
+  # Ensure patchelf doesn't miss these
+  runtimeDependencies = lib.optionals stdenv.isLinux runtimeLibs;
 
   appendRunpaths = lib.optionals stdenv.isLinux [
-    "${pipewire}/lib"
-    "${libGL}/lib"
-    "${udev}/lib"
+    "${lib.getLib pipewire}/lib"
+    "${lib.getLib libGL}/lib"
+    "${lib.getLib udev}/lib"
   ];
 
-  # Firefox uses "relrhack" to manually process relocations from a fixed offset
   patchelfFlags = lib.optionals stdenv.isLinux [ "--no-clobber-old-sections" ];
 
-  # 1. Add ffmpeg to LD_LIBRARY_PATH (mirroring Zen's approach) for media support
-  # 2. Set MOZ_LEGACY_PROFILES=1 to prevent creating new profiles on every update
-  # 3. Set MOZ_ALLOW_DOWNGRADE=1 to prevent errors if rolling back updates
   preFixup = lib.optionalString stdenv.isLinux ''
     gappsWrapperArgs+=(
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ ffmpeg ]}"
+      # Explicitly inject runtime libraries. 
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath runtimeLibs}"
+
+      --set MOZ_APP_LAUNCHER "${appId}"
       --set MOZ_LEGACY_PROFILES 1
       --set MOZ_ALLOW_DOWNGRADE 1
-      --add-flags "--name=glide-browser"
-      --add-flags "--class=glide-browser"
+      --set-default MOZ_ENABLE_WAYLAND 1
+      
+      # Required for the window manager to associate the window correctly
+      --add-flags "--name=${appId}"
+      --add-flags "--class=${appId}"
     )
   '';
 
   unpackPhase = lib.optionalString stdenv.isDarwin ''
     runHook preUnpack
-
     /usr/bin/hdiutil attach -nobrowse -readonly $src
     cp -r /Volumes/Glide/Glide.app .
     /usr/bin/hdiutil detach /Volumes/Glide
-
     runHook postUnpack
   '';
 
@@ -119,45 +181,45 @@ stdenv.mkDerivation (finalAttrs: {
 
         mkdir -p $out/bin $out/share/icons/hicolor/ $out/lib/glide-browser-bin-${finalAttrs.version}
         cp -t $out/lib/glide-browser-bin-${finalAttrs.version} -r *
+
+        # Ensure binaries are executable for patchelf
         chmod +x $out/lib/glide-browser-bin-${finalAttrs.version}/glide
+
         iconDir=$out/share/icons/hicolor
         browserIcons=$out/lib/glide-browser-bin-${finalAttrs.version}/browser/chrome/icons/default
 
         for i in 16 32 48 64 128; do
           iconSizeDir="$iconDir/''${i}x$i/apps"
           mkdir -p $iconSizeDir
-          cp $browserIcons/default$i.png $iconSizeDir/glide-browser.png
+          cp $browserIcons/default$i.png $iconSizeDir/${appId}.png
         done
 
         ln -s $out/lib/glide-browser-bin-${finalAttrs.version}/glide $out/bin/glide
-        ln -s $out/bin/glide $out/bin/glide-browser
+        ln -s $out/bin/glide $out/bin/${appId}
 
         runHook postInstall
       ''
     else
       ''
         runHook preInstall
-
         mkdir -p $out/Applications
         cp -r Glide.app $out/Applications/
-
         mkdir -p $out/bin
         ln -s $out/Applications/Glide.app/Contents/MacOS/glide $out/bin/glide
-        ln -s $out/bin/glide $out/bin/glide-browser
-
+        ln -s $out/bin/glide $out/bin/${appId}
         runHook postInstall
       '';
 
   desktopItems = [
     (makeDesktopItem {
-      name = "glide-browser-bin";
-      exec = "glide-browser --name glide-browser %U";
-      icon = "glide-browser";
+      name = appId;
+      exec = "${appId} --name ${appId} %U";
+      icon = appId;
       desktopName = "Glide Browser";
       genericName = "Web Browser";
       terminal = false;
       startupNotify = true;
-      startupWMClass = "glide-browser";
+      startupWMClass = appId;
       categories = [
         "Network"
         "WebBrowser"
@@ -173,15 +235,15 @@ stdenv.mkDerivation (finalAttrs: {
       actions = {
         new-window = {
           name = "New Window";
-          exec = "glide-browser --new-window %U";
+          exec = "${appId} --new-window %U";
         };
         new-private-window = {
           name = "New Private Window";
-          exec = "glide-browser --private-window %U";
+          exec = "${appId} --private-window %U";
         };
         profile-manager-window = {
           name = "Profile Manager";
-          exec = "glide-browser --ProfileManager";
+          exec = "${appId} --ProfileManager";
         };
       };
     })
@@ -207,6 +269,6 @@ stdenv.mkDerivation (finalAttrs: {
       "aarch64-darwin"
     ];
     maintainers = with lib.maintainers; [ pyrox0 ];
-    mainProgram = "glide-browser";
+    mainProgram = appId;
   };
 })
