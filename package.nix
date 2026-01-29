@@ -156,6 +156,7 @@ stdenv.mkDerivation (finalAttrs: {
       # Fixes: Mic (libpulseaudio), Notifications (libnotify), HW Accel (libva/mesa), Screenshare (libgbm/pipewire)
       --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath runtimeLibs}"
 
+      --set MOZ_APP_LAUNCHER "${appId}"
       --set MOZ_LEGACY_PROFILES 1
       --set MOZ_ALLOW_DOWNGRADE 1
       --set-default MOZ_ENABLE_WAYLAND 1
