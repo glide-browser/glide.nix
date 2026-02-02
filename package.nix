@@ -2,7 +2,9 @@
   lib,
   stdenv,
   fetchurl,
+  config,
   # Build/Packaging Tools
+  writeText,
   autoPatchelfHook,
   copyDesktopItems,
   makeBinaryWrapper,
@@ -41,6 +43,7 @@
   vulkan-loader,
   wayland,
   xorg,
+  policies ? {},
   ...
 }:
 let
@@ -89,6 +92,12 @@ let
     xorg.libXrandr
     xorg.libxcb
   ];
+
+  firefoxPolicies =
+    (config.firefox.policies or {})
+    // policies;
+
+  policiesJson = writeText "firefox-policies.json" (builtins.toJSON {policies = firefoxPolicies;});
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "glide-browser";
@@ -197,6 +206,9 @@ stdenv.mkDerivation (finalAttrs: {
         ln -s $out/lib/glide-browser-bin-${finalAttrs.version}/glide $out/bin/glide
         ln -s $out/bin/glide $out/bin/${appId}
 
+        mkdir -p $out/lib/glide-browser-bin-${finalAttrs.version}/distribution/
+        ln -s ${policiesJson} "$out/lib/glide-browser-bin-${finalAttrs.version}/distribution/policies.json"
+
         runHook postInstall
       ''
     else
@@ -207,6 +219,8 @@ stdenv.mkDerivation (finalAttrs: {
         mkdir -p $out/bin
         ln -s $out/Applications/Glide.app/Contents/MacOS/glide $out/bin/glide
         ln -s $out/bin/glide $out/bin/${appId}
+        mkdir -p "$out/Applications/Glide.app/Contents/Resources/distribution"
+        ln -s ${policiesJson} "$out/Applications/Glide.app/Contents/Resources/distribution/policies.json"
         runHook postInstall
       '';
 
