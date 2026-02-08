@@ -23,14 +23,21 @@
   glib,
   gsettings-desktop-schemas,
   gtk3,
-  libcanberra-gtk3,
   libGL,
+  libX11,
+  libXcomposite,
+  libXdamage,
+  libXext,
+  libXfixes,
+  libXrandr,
+  libcanberra-gtk3,
   libdrm,
   libgbm,
   libnotify,
   libpulseaudio,
   librsvg,
   libva,
+  libxcb,
   libxkbcommon,
   mesa,
   pango,
@@ -40,7 +47,6 @@
   udev,
   vulkan-loader,
   wayland,
-  xorg,
   ...
 }:
 let
@@ -81,13 +87,13 @@ let
     udev
 
     # X11 Compatibility
-    xorg.libX11
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXrandr
-    xorg.libxcb
+    libX11
+    libXcomposite
+    libXdamage
+    libXext
+    libXfixes
+    libXrandr
+    libxcb
   ];
 in
 stdenv.mkDerivation (finalAttrs: {
