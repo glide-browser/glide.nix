@@ -5,7 +5,12 @@
     nixpkgs.url = "github:NixOS/nixpkgs/master";
   };
 
-  outputs = { self, nixpkgs, ... }:
+  inputs.home-manager = {
+    url = "github:nix-community/home-manager";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { self, home-manager, nixpkgs, ... }:
   let
     systems = [
       "x86_64-linux"
@@ -20,9 +25,10 @@
       let
         pkgs = import nixpkgs { inherit system; };
         glide = pkgs.callPackage ./package.nix { };
-      in {
-        default = glide;
-        glide-browser = glide;
+      in rec {
+        glide-browser-unwrapped = glide;
+        glide-browser = pkgs.wrapFirefox glide-browser-unwrapped {};
+        default = glide-browser;
       }
     );
 
@@ -38,6 +44,12 @@
 
     overlays.default = final: prev: {
       glide-browser = final.callPackage ./package.nix { };
+    };
+
+    homeModules = {
+      default = import ./hm-module.nix {
+        inherit self home-manager;
+      };
     };
   };
 }

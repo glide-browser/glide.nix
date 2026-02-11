@@ -174,7 +174,7 @@ stdenv.mkDerivation (finalAttrs: {
       --set MOZ_LEGACY_PROFILES 1
       --set MOZ_ALLOW_DOWNGRADE 1
       --set-default MOZ_ENABLE_WAYLAND 1
-      
+
       # Required for the window manager to associate the window correctly
       --add-flags "--name=${appId}"
       --add-flags "--class=${appId}"
@@ -269,11 +269,15 @@ stdenv.mkDerivation (finalAttrs: {
     })
   ];
 
-  passthru.updateScript = nix-update-script {
-    extraArgs = [
-      "--url"
-      "https://github.com/glide-browser/glide"
-    ];
+  passthru = {
+    updateScript = nix-update-script {
+      extraArgs = [
+        "--url"
+        "https://github.com/glide-browser/glide"
+      ];
+    };
+    applicationName = "Glide Browser";
+    inherit gtk3;
   };
 
   meta = {
