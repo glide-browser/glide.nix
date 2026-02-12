@@ -9,14 +9,7 @@
   ...
 }:
 let
-  inherit (lib)
-    getAttrFromPath
-    isPath
-    mkIf
-    mkOption
-    setAttrByPath
-    types
-    ;
+  inherit (lib) mkIf;
 
   cfg = config.programs.glide-browser;
 
@@ -41,19 +34,45 @@ in
         configPath = ".config/glide/glide";
       };
       platforms.darwin = {
-        # TODO: don't know?
         configPath = "Library/Application Support/Glide Browser";
       };
     })
   ];
 
-  options.programs.glide-browser = { };
-
   config = mkIf cfg.enable {
     programs.glide-browser = {
       package = lib.mkDefault (
-        (pkgs.wrapFirefox (self.packages.${pkgs.stdenv.hostPlatform.system}."glide-browser-unwrapped") { })
+        pkgs.wrapFirefox (self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-unwrapped.override
+          {
+            policies = cfg.policies;
+          }
+        ) { }
       );
     };
+
+    home.file =
+      let
+        inherit (pkgs.stdenv) isDarwin;
+        nativeMessagingHostPath =
+          if isDarwin then
+            "~/Library/Application Support/Glide Browser/NativeMessagingHosts"
+          else
+            ".glide-browser/native-messaging-hosts";
+        packageJoin = pkgs.symlinkJoin {
+          name = "glide-native-messaging-hosts";
+          paths = lib.flatten (
+            lib.concatLists [
+              cfg.nativeMessagingHosts
+            ]
+          );
+        };
+      in
+      mkIf (cfg.nativeMessagingHosts != [ ]) {
+        "${nativeMessagingHostPath}" = {
+          source = "${packageJoin}/lib/mozilla/native-messaging-hosts";
+          recursive = true;
+          ignorelinks = true;
+        };
+      };
   };
 }
