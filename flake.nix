@@ -2,7 +2,7 @@
   description = "Flake for glide-browser";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/master";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   inputs.home-manager = {
@@ -31,20 +31,6 @@
         default = glide-browser;
       }
     );
-
-    apps = forAllSystems (system: {
-      default = let
-        pkg = self.packages.${system}.default;
-        mainProgram = pkg.meta.mainProgram;
-      in {
-        type = "app";
-        program = "${pkg}/bin/${mainProgram}";
-      };
-    });
-
-    overlays.default = final: prev: {
-      glide-browser = final.callPackage ./package.nix { };
-    };
 
     homeModules = {
       default = import ./hm-module.nix {
