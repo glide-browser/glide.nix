@@ -27,7 +27,9 @@
         glide = pkgs.callPackage ./package.nix { };
       in rec {
         glide-browser-unwrapped = glide;
-        glide-browser = pkgs.wrapFirefox glide-browser-unwrapped {};
+        glide-browser = pkgs.wrapFirefox glide-browser-unwrapped {
+          pname = "glide-browser";
+        };
         default = glide-browser;
       }
     );
