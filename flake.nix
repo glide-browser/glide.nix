@@ -26,11 +26,11 @@
         pkgs = import nixpkgs { inherit system; };
         glide = pkgs.callPackage ./package.nix { };
       in rec {
-        glide-browser-unwrapped = glide;
-        glide-browser = pkgs.wrapFirefox glide-browser-unwrapped {
+        glide-browser-bin-unwrapped = glide;
+        glide-browser-bin = pkgs.wrapFirefox glide-browser-bin-unwrapped {
           pname = "glide-browser";
         };
-        default = glide-browser;
+        default = glide-browser-bin;
       }
     );
 

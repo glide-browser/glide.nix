@@ -27,8 +27,8 @@ in
       inherit modulePath;
       name = applicationName;
       description = "Extensible and keyboard-focused web browser, based on Firefox (binary package)";
-      wrappedPackageName = "(self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser)";
-      unwrappedPackageName = "(self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-unwrapped)";
+      wrappedPackageName = "(self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-bin)";
+      unwrappedPackageName = "(self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-bin-unwrapped)";
       visible = true;
       platforms.linux = {
         configPath = ".config/glide/glide";
@@ -42,12 +42,12 @@ in
   config = mkIf cfg.enable {
     programs.glide-browser = {
       package = lib.mkDefault (
-        pkgs.wrapFirefox (self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-unwrapped.override
+        pkgs.wrapFirefox (self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-bin-unwrapped.override
           {
             policies = cfg.policies;
           }
         ) {
-          pname = "glide-browser";
+          pname = "glide-browser-bin";
         }
       );
     };

@@ -29,7 +29,7 @@ let
     builtins.toJSON { policies = glidePolicies; }
   );
 
-  pname = "glide-browser-unwrapped";
+  pname = "glide-browser-bin-unwrapped";
 
   version = "0.1.59a";
 in
