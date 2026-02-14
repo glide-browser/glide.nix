@@ -46,7 +46,9 @@ in
           {
             policies = cfg.policies;
           }
-        ) { }
+        ) {
+          pname = "glide-browser";
+        }
       );
     };
 

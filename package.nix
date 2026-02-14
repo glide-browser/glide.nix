@@ -90,7 +90,7 @@ stdenv.mkDerivation {
 
     mkdir -p $prefix/lib $out/bin
     cp -r . $prefix/lib/glide-browser-bin-${version}
-    ln -s $prefix/lib/glide-browser-bin-${version}/glide $out/bin/${binaryName}-unwrapped
+    ln -s $prefix/lib/glide-browser-bin-${version}/glide $out/bin/${binaryName}
     # See: https://github.com/mozilla/policy-templates/blob/master/README.md
     mkdir -p $out/lib/glide-browser-bin-${version}/distribution/
     ln -s ${policiesJson} $out/lib/glide-browser-bin-${version}/distribution/policies.json
@@ -99,6 +99,7 @@ stdenv.mkDerivation {
   '';
 
   passthru = {
+    inherit binaryName;
     updateScript = nix-update-script {
       extraArgs = [
         "--url"
@@ -125,6 +126,6 @@ stdenv.mkDerivation {
       "aarch64-darwin"
     ];
     maintainers = with lib.maintainers; [ pyrox0 ];
-    mainProgram = "glide-browser-unwrapped";
+    mainProgram = "glide-browser";
   };
 }
