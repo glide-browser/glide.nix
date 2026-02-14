@@ -100,17 +100,17 @@ stdenv.mkDerivation {
 
   passthru = {
     inherit binaryName;
+    applicationName = "Glide Browser";
+    libName = "glide-browser-bin-${version}";
+    ffmpegSupport = true;
+    gssSupport = true;
+    inherit gtk3;
     updateScript = nix-update-script {
       extraArgs = [
         "--url"
         "https://github.com/glide-browser/glide"
       ];
     };
-    applicationName = "Glide Browser";
-    libName = "glide-browser-bin-${version}";
-    ffmpegSupport = true;
-    gssSupport = true;
-    inherit gtk3;
   };
 
   meta = {
