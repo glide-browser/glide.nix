@@ -108,8 +108,6 @@ stdenv.mkDerivation {
       ''
     else
       ''
-        runHook preInstall
-
         mkdir -p $prefix/lib $out/bin
         cp -r . $prefix/lib/glide-browser-bin-${version}
 
@@ -118,8 +116,6 @@ stdenv.mkDerivation {
         # See: https://github.com/mozilla/policy-templates/blob/master/README.md
         mkdir -p $out/lib/glide-browser-bin-${version}/distribution/
         ln -s ${policiesJson} $out/lib/glide-browser-bin-${version}/distribution/policies.json
-
-        runHook postInstall
       '';
 
   passthru = {
