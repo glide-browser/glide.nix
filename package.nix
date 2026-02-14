@@ -16,7 +16,9 @@
   adwaita-icon-theme,
   writeText,
   patchelfUnstable, # have to use patchelfUnstable to support --no-clobber-old-sections
+  undmg,
   nix-update-script,
+  applicationName ? "Glide Browser",
   policies ? { },
 }:
 
@@ -60,13 +62,20 @@ stdenv.mkDerivation {
     in
     sources.${stdenv.hostPlatform.system};
 
+  sourceRoot = lib.optional stdenv.hostPlatform.isDarwin ".";
+
   nativeBuildInputs = [
     wrapGAppsHook3
+  ]
+  ++ lib.optionals (!stdenv.hostPlatform.isDarwin) [
     autoPatchelfHook
     patchelfUnstable
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    undmg
   ];
 
-  buildInputs = [
+  buildInputs = lib.optionals (!stdenv.hostPlatform.isDarwin) [
     gtk3
     adwaita-icon-theme
     alsa-lib
@@ -76,31 +85,46 @@ stdenv.mkDerivation {
 
   runtimeDependencies = [
     curl
-    libva.out
     pciutils
+  ]
+  ++ lib.optionals (!stdenv.hostPlatform.isDarwin) [
+    libva.out
   ];
 
-  appendRunpaths = [ "${pipewire}/lib" ];
+  appendRunpaths = lib.optionals (!stdenv.hostPlatform.isDarwin) [
+    "${pipewire}/lib"
+  ];
 
   # Firefox uses "relrhack" to manually process relocations from a fixed offset
   patchelfFlags = [ "--no-clobber-old-sections" ];
 
-  installPhase = ''
-    runHook preInstall
+  installPhase =
+    if stdenv.hostPlatform.isDarwin then
+      ''
+        mkdir -p $out/Applications
+        mv Glide*.app "$out/Applications/${applicationName}.app"
 
-    mkdir -p $prefix/lib $out/bin
-    cp -r . $prefix/lib/glide-browser-bin-${version}
-    ln -s $prefix/lib/glide-browser-bin-${version}/glide $out/bin/${binaryName}
-    # See: https://github.com/mozilla/policy-templates/blob/master/README.md
-    mkdir -p $out/lib/glide-browser-bin-${version}/distribution/
-    ln -s ${policiesJson} $out/lib/glide-browser-bin-${version}/distribution/policies.json
+        ln -s "$out/Applications/${applicationName}.app/Contents/MacOS/glide" "$out/Applications/${applicationName}.app/Contents/MacOS/${binaryName}"
+      ''
+    else
+      ''
+        runHook preInstall
 
-    runHook postInstall
-  '';
+        mkdir -p $prefix/lib $out/bin
+        cp -r . $prefix/lib/glide-browser-bin-${version}
+
+        ln -s $prefix/lib/glide-browser-bin-${version}/glide $out/bin/${binaryName}
+
+        # See: https://github.com/mozilla/policy-templates/blob/master/README.md
+        mkdir -p $out/lib/glide-browser-bin-${version}/distribution/
+        ln -s ${policiesJson} $out/lib/glide-browser-bin-${version}/distribution/policies.json
+
+        runHook postInstall
+      '';
 
   passthru = {
     inherit binaryName;
-    applicationName = "Glide Browser";
+    inherit applicationName;
     libName = "glide-browser-bin-${version}";
     ffmpegSupport = true;
     gssSupport = true;
