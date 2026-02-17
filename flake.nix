@@ -2,10 +2,15 @@
   description = "Flake for glide-browser";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/master";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, nixpkgs, ... }:
+  inputs.home-manager = {
+    url = "github:nix-community/home-manager";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { self, home-manager, nixpkgs, ... }:
   let
     systems = [
       "x86_64-linux"
@@ -20,24 +25,19 @@
       let
         pkgs = import nixpkgs { inherit system; };
         glide = pkgs.callPackage ./package.nix { };
-      in {
-        default = glide;
-        glide-browser = glide;
+      in rec {
+        glide-browser-bin-unwrapped = glide;
+        glide-browser-bin = pkgs.wrapFirefox glide-browser-bin-unwrapped {
+          pname = "glide-browser";
+        };
+        default = glide-browser-bin;
       }
     );
 
-    apps = forAllSystems (system: {
-      default = let
-        pkg = self.packages.${system}.default;
-        mainProgram = pkg.meta.mainProgram;
-      in {
-        type = "app";
-        program = "${pkg}/bin/${mainProgram}";
+    homeModules = {
+      default = import ./hm-module.nix {
+        inherit self home-manager;
       };
-    });
-
-    overlays.default = final: prev: {
-      glide-browser = final.callPackage ./package.nix { };
     };
   };
 }
