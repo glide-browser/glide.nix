@@ -39,5 +39,12 @@
         inherit self home-manager;
       };
     };
+
+    overlays.default = final: prev: {
+      glide-browser-bin-unwrapped = final.callPackage ./package.nix { };
+      glide-browser-bin = final.wrapFirefox (final.callPackage ./package.nix { }) {
+        pname = "glide-browser";
+      };
+    };
   };
 }
