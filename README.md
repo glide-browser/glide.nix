@@ -11,23 +11,22 @@ The browser can be configured declaratively by passing policies to the package:
 environment.systemPackages = [
   (inputs.glide.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
     policies = {
-	  AutofillAddressEnabled = true;
-	  AutofillCreditCardEnabled = false;
-	  DisableAppUpdate = true;
-	  DisableFeedbackCommands = true;
-	  DisableFirefoxStudies = true;
-	  DisablePocket = true;
-	  DisableTelemetry = true;
-	  DontCheckDefaultBrowser = true;
-	  NoDefaultBookmarks = true;
-	  OfferToSaveLogins = false;
-	  EnableTrackingProtection = {
-		Value = true;
-		Locked = true;
-		Cryptomining = true;
-		Fingerprinting = true;
+	    AutofillAddressEnabled = true;
+	    AutofillCreditCardEnabled = false;
+	    DisableAppUpdate = true;
+	    DisableFeedbackCommands = true;
+	    DisableFirefoxStudies = true;
+	    DisableTelemetry = true;
+	    DontCheckDefaultBrowser = true;
+	    NoDefaultBookmarks = true;
+	    OfferToSaveLogins = false;
+	    EnableTrackingProtection = {
+		    Value = true;
+		    Locked = true;
+		    Cryptomining = true;
+		    Fingerprinting = true;
+	    };
 	  };
-	};
   })
 ];
 ```
@@ -37,24 +36,23 @@ With `glide` being your flake input for glide.
 ```nix
 environment.systemPackages = [
   (pkgs.callPackage /path/to/glide.nix/package.nix {
-	policies = {
-	  AutofillAddressEnabled = true;
-	  AutofillCreditCardEnabled = false;
-	  DisableAppUpdate = true;
-	  DisableFeedbackCommands = true;
-	  DisableFirefoxStudies = true;
-	  DisablePocket = true;
-	  DisableTelemetry = true;
-	  DontCheckDefaultBrowser = true;
-	  NoDefaultBookmarks = true;
-	  OfferToSaveLogins = false;
-	  EnableTrackingProtection = {
-		Value = true;
-		Locked = true;
-		Cryptomining = true;
-		Fingerprinting = true;
+	  policies = {
+	    AutofillAddressEnabled = true;
+	    AutofillCreditCardEnabled = false;
+	    DisableAppUpdate = true;
+	    DisableFeedbackCommands = true;
+	    DisableFirefoxStudies = true;
+	    DisableTelemetry = true;
+	    DontCheckDefaultBrowser = true;
+	    NoDefaultBookmarks = true;
+	    OfferToSaveLogins = false;
+	    EnableTrackingProtection = {
+		    Value = true;
+		    Locked = true;
+		    Cryptomining = true;
+		    Fingerprinting = true;
+	    };
 	  };
-	};
   })
 ];
 ```
