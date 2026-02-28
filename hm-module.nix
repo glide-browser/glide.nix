@@ -29,7 +29,6 @@ in
       description = "Extensible and keyboard-focused web browser, based on Firefox (binary package)";
       wrappedPackageName = "(self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-bin)";
       unwrappedPackageName = "(self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-bin-unwrapped)";
-      visible = true;
       platforms.linux = {
         configPath = ".config/glide/glide";
       };
