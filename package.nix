@@ -18,7 +18,7 @@
   patchelfUnstable, # have to use patchelfUnstable to support --no-clobber-old-sections
   undmg,
   nix-update-script,
-  applicationName ? "Glide Browser",
+  applicationName ? "Glide",
   policies ? { },
 }:
 

@@ -13,7 +13,7 @@ let
 
   cfg = config.programs.glide-browser;
 
-  applicationName = "Glide Browser";
+  applicationName = "Glide";
   modulePath = [
     "programs"
     "glide-browser"
