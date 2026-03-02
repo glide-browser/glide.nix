@@ -33,7 +33,7 @@ in
         configPath = ".config/glide/glide";
       };
       platforms.darwin = {
-        configPath = "Library/Application Support/glide";
+        configPath = "Library/Application Support/Glide Browser";
       };
     })
   ];
