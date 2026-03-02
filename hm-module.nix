@@ -56,7 +56,7 @@ in
         inherit (pkgs.stdenv) isDarwin;
         nativeMessagingHostPath =
           if isDarwin then
-            "~/Library/Application Support/Glide Browser/NativeMessagingHosts"
+            "Library/Application Support/Glide Browser/NativeMessagingHosts"
           else
             ".glide-browser/native-messaging-hosts";
         packageJoin = pkgs.symlinkJoin {
