@@ -35,7 +35,7 @@
     );
 
     homeModules = {
-      default = import ./hm-module.nix {
+      default = import ./hm-module {
         inherit self home-manager;
       };
     };
