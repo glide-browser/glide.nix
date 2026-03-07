@@ -33,7 +33,7 @@ inputs = {
 ```nix
 environment.systemPackages = [
   (inputs.glide.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-    policies = {
+    extraPolicies = {
       AutofillAddressEnabled = true;
       AutofillCreditCardEnabled = false;
       # ...
@@ -43,7 +43,7 @@ environment.systemPackages = [
 
 home.packages = [
   (inputs.glide.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-    policies = {
+    extraPolicies = {
       AutofillAddressEnabled = true;
       AutofillCreditCardEnabled = false;
       # ...
