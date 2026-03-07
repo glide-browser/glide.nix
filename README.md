@@ -34,20 +34,20 @@ inputs = {
 environment.systemPackages = [
   (inputs.glide.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
     policies = {
-	  AutofillAddressEnabled = true;
-	  AutofillCreditCardEnabled = false;
+      AutofillAddressEnabled = true;
+      AutofillCreditCardEnabled = false;
       # ...
-	};
+    };
   })
 ];
 
 home.packages = [
   (inputs.glide.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
     policies = {
-	  AutofillAddressEnabled = true;
-	  AutofillCreditCardEnabled = false;
+      AutofillAddressEnabled = true;
+      AutofillCreditCardEnabled = false;
       # ...
-	};
+    };
   })
 ];
 ```
@@ -56,7 +56,6 @@ home.packages = [
 
 ```nix
 programs.glide-browser.enable = true;
-
 ```
 
 This repo uses `mkFirefoxModule` from Home Manager.
@@ -67,11 +66,11 @@ Take a look at [Home Manager references](https://nix-community.github.io/home-ma
 ```nix
 environment.systemPackages = [
   (pkgs.callPackage /path/to/glide.nix/package.nix {
-	policies = {
-	  AutofillAddressEnabled = true;
-	  AutofillCreditCardEnabled = false;
+    policies = {
+      AutofillAddressEnabled = true;
+      AutofillCreditCardEnabled = false;
       # ...
-	};
+    };
   })
 ];
 ```
