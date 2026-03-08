@@ -2,8 +2,6 @@
 
 A binary package for [Glide Browser](https://glide-browser.app) until Glide is in nixpkgs ([PR](https://github.com/NixOS/nixpkgs/pull/447604)).
 
-This was originally based off of [pyrox](https://git.pyrox.dev/pyrox/nix)'s work, and adapted to support multiple architectures.
-
 ## Features
 
 - Linux and macOS support
