@@ -406,6 +406,55 @@ let
 
     searchEngines = v: map (x: "glide.search_engines.add(${toTS x});") v;
 
+    sites =
+      v:
+      map (
+        site:
+        let
+          enabledKeymaps = builtins.filter (x: x.enable) site.keymaps;
+
+          keymapLines = parse enabledKeymaps (
+            keymaps:
+            map (
+              x:
+              let
+                opts = if x.options != null then ", ${toTS x.options}" else "";
+              in
+              ''glide.buf.keymaps.set(${toTS x.modes}, "${x.key}", ${toTS x.action}${opts});''
+            ) keymaps
+          );
+
+          cleanupLines =
+            if enabledKeymaps != [ ] then
+              lib.concatStringsSep "\n" (
+                map (x: ''glide.buf.keymaps.del(${toTS x.modes}, "${x.key}");'') enabledKeymaps
+              )
+            else
+              "";
+
+          styleLines = parse site.styles maps.styles;
+          excmdLines = parse site.excmds maps.excmds;
+
+          body = lib.concatStringsSep "\n" (
+            builtins.filter (x: x != "") [
+              keymapLines
+              styleLines
+              excmdLines
+            ]
+          );
+
+          cleanup =
+            if cleanupLines != "" then
+              "\n  return () => {\n${indentLines (indentLines cleanupLines)}\n  };"
+            else
+              "";
+        in
+        ''
+          glide.autocmds.create("UrlEnter", ${toTS site.pattern}, () => {
+          ${indentLines body}${cleanup}
+          });''
+      ) v;
+
     autocmds =
       v:
       map (
@@ -505,6 +554,44 @@ in
         default = [ ];
       };
 
+      sites = mkOption {
+        type = types.attrsOf (
+          types.submodule {
+            options = {
+              pattern = mkOption {
+                type = types.oneOf [
+                  types.str
+                  rawType
+                  (types.submodule {
+                    options = {
+                      hostname = mkOption {
+                        type = types.str;
+                      };
+                    };
+                  })
+                ];
+              };
+
+              keymaps = mkOption {
+                type = types.listOf keymapType;
+                default = [ ];
+              };
+
+              styles = mkOption {
+                type = types.listOf pathOrStr;
+                default = [ ];
+              };
+
+              excmds = mkOption {
+                type = types.listOf excmdsType;
+                default = [ ];
+              };
+            };
+          }
+        );
+        default = { };
+      };
+
       search_engines = mkOption {
         type = types.listOf searchEngineType;
         default = [ ];
@@ -585,6 +672,7 @@ in
                 (notNull cfg.settings.label_generators (x: "glide.hints.label_generators = ${x}"))
                 (parse cfg.settings.preferences maps.prefs)
                 (parse cfg.settings.options maps.options)
+                (parse (lib.attrValues cfg.settings.sites) maps.sites)
                 (parse cfg.settings.search_engines maps.searchEngines)
                 (parse cfg.settings.excmds maps.excmds)
                 (parse cfg.settings.keymaps maps.keymaps)
