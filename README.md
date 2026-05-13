@@ -11,6 +11,13 @@ A binary package for [Glide Browser](https://glide-browser.app) until Glide is i
 
 ## Installation
 
+> [!TIP]
+> You can launch a one-off instance without modifying your configuration:
+> ```
+> nix run github:glide-browser/glide.nix
+> ```
+> (Add `--extra-experimental-features "nix-command flakes"` if you don't have flakes enabled globally.)
+
 ### With flakes
 
 Add it is as a flake input:
