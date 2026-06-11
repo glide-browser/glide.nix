@@ -101,7 +101,10 @@ stdenv.mkDerivation {
   # don't break code signing
   dontFixup = stdenv.hostPlatform.isDarwin;
 
-  installPhase =
+  installPhase = ''
+    runHook preInstall
+  ''
+  + (
     if stdenv.hostPlatform.isDarwin then
       ''
         mkdir -p $out/Applications
@@ -117,7 +120,11 @@ stdenv.mkDerivation {
         # See: https://github.com/mozilla/policy-templates/blob/master/README.md
         mkdir -p $out/lib/glide-browser-bin-${version}/distribution/
         ln -s ${policiesJson} $out/lib/glide-browser-bin-${version}/distribution/policies.json
-      '';
+      ''
+  )
+  + ''
+    runHook postInstall
+  '';
 
   passthru = {
     inherit binaryName;
