@@ -18,7 +18,7 @@
   in {
     packages = forAllSystems (system:
       let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = nixpkgs.legacyPackages.${system};
         glide = pkgs.callPackage ./package.nix { };
       in rec {
         glide-browser-bin-unwrapped = glide;
