@@ -1,11 +1,11 @@
 {
-  home-manager,
   self,
 }:
 {
   config,
   pkgs,
   lib,
+  modulesPath,
   ...
 }:
 let
@@ -19,7 +19,7 @@ let
     "glide-browser"
   ];
 
-  mkFirefoxModule = import "${home-manager.outPath}/modules/programs/firefox/mkFirefoxModule.nix";
+  mkFirefoxModule = import "${modulesPath}/modules/programs/firefox/mkFirefoxModule.nix";
 in
 {
   imports = [
