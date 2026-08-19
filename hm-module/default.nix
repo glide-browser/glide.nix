@@ -53,7 +53,7 @@ in
 
     home.file =
       let
-        inherit (pkgs.stdenv) isDarwin;
+        inherit (pkgs.stdenv.hostPlatform) isDarwin;
         nativeMessagingHostPath =
           if isDarwin then
             "Library/Application Support/Glide Browser/NativeMessagingHosts"
