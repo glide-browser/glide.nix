@@ -33,7 +33,7 @@ in
         configPath = ".config/glide/glide";
       };
       platforms.darwin = {
-        configPath = "Library/Application Support/Glide Browser";
+        configPath = "Library/Application Support/glide";
       };
     })
   ];
@@ -41,13 +41,13 @@ in
   config = mkIf cfg.enable {
     programs.glide-browser = {
       package = lib.mkDefault (
-        pkgs.wrapFirefox (self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-bin-unwrapped.override
-          {
+        pkgs.wrapFirefox
+          (self.packages.${pkgs.stdenv.hostPlatform.system}.glide-browser-bin-unwrapped.override {
             policies = cfg.policies;
+          })
+          {
+            pname = "glide-browser-bin";
           }
-        ) {
-          pname = "glide-browser-bin";
-        }
       );
     };
 
@@ -56,7 +56,7 @@ in
         inherit (pkgs.stdenv) isDarwin;
         nativeMessagingHostPath =
           if isDarwin then
-            "Library/Application Support/Glide Browser/NativeMessagingHosts"
+            "Library/Application Support/glide/NativeMessagingHosts"
           else
             ".glide-browser/native-messaging-hosts";
         packageJoin = pkgs.symlinkJoin {
