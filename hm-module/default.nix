@@ -33,6 +33,7 @@ in
         configPath = ".config/glide/glide";
       };
       platforms.darwin = {
+        # note: the profile root is `~/Library/Application Support/<MOZ_APP_BASENAME>`, and our basename is `glide`
         configPath = "Library/Application Support/glide";
       };
     })
@@ -55,8 +56,12 @@ in
       let
         inherit (pkgs.stdenv) isDarwin;
         nativeMessagingHostPath =
+          # note: this is intentionally different from the profile directory above.
+          # Glide patches `nsXREDirProvider.cpp` so that native manifests are looked
+          # up under `Glide Browser` on macOS and `.glide-browser` on Linux, see
+          # https://glide-browser.app/firefox
           if isDarwin then
-            "Library/Application Support/glide/NativeMessagingHosts"
+            "Library/Application Support/Glide Browser/NativeMessagingHosts"
           else
             ".glide-browser/native-messaging-hosts";
         packageJoin = pkgs.symlinkJoin {
