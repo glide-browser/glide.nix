@@ -8,6 +8,7 @@
   alsa-lib,
   curl,
   dbus-glib,
+  ffmpeg_9,
   gtk3,
   libxtst,
   libva,
@@ -130,8 +131,9 @@ stdenv.mkDerivation {
     inherit binaryName;
     inherit applicationName;
     libName = "glide-browser-bin-${version}";
-    ffmpegSupport = true;
-    gssSupport = true;
+    ffmpegPackage = ffmpeg_9;
+    withFFmpeg = true;
+    withGSSAPI = true;
     inherit gtk3;
     updateScript = nix-update-script {
       extraArgs = [
