@@ -34,7 +34,7 @@ let
 
   pname = "glide-browser-bin-unwrapped";
 
-  version = "0.1.64a";
+  version = "0.1.65a";
 in
 
 stdenv.mkDerivation {
@@ -45,19 +45,19 @@ stdenv.mkDerivation {
       sources = {
         "x86_64-linux" = fetchurl {
           url = "https://github.com/glide-browser/glide/releases/download/${version}/glide.linux-x86_64.tar.xz";
-          sha256 = "sha256-H5ewo9GbWbpkFFsAARd0FHxD9AXU8Dc4alvNqa6lMP0=";
+          sha256 = "sha256-gjNbNbJOiK7ih8WhrQzE8o7MxQL/VGhv0mvLegLqwlc=";
         };
         "aarch64-linux" = fetchurl {
           url = "https://github.com/glide-browser/glide/releases/download/${version}/glide.linux-aarch64.tar.xz";
-          sha256 = "sha256-WIsgOPKP8K9P3dUSMY2iNRmjgElVdwilnF7hZ7TxWeY=";
+          sha256 = "sha256-rxqblqAeYNtr/jrcedJuxp+4urvYkYU/G5oJoZ6shxA=";
         };
         "x86_64-darwin" = fetchurl {
           url = "https://github.com/glide-browser/glide/releases/download/${version}/glide.macos-x86_64.dmg";
-          sha256 = "sha256-rLruG+WY6XyDr8t7ghRpUbQp0xlIiXua/3TTlfL5TrQ=";
+          sha256 = "sha256-fIDWwgDCtM3E5YM/GINFZZosFv85iytJ8aChyuU7AXw=";
         };
         "aarch64-darwin" = fetchurl {
           url = "https://github.com/glide-browser/glide/releases/download/${version}/glide.macos-aarch64.dmg";
-          sha256 = "sha256-lm1/XbMdEwzM3iMQlyXqg7kAbAgxPcwQwcC/aDPggqY=";
+          sha256 = "sha256-wbjp7xxI0mDMWcBCG/eF0H0XCw4fP7kZaHVsl4LaTNY=";
         };
       };
     in
